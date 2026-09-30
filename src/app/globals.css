@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #0A1628;
+  --color-ivory: #F5F1EA;
+  --color-gold: #C8A96B;
+  --color-sage: #2F4A44;
+
+  --color-dark-glass: rgba(10, 22, 40, 0.6);
+  --color-light-glass: rgba(245, 241, 234, 0.6);
+
+  --font-serif: var(--font-cormorant);
+  --font-sans: var(--font-inter);
+}
+
+@layer base {
+  :root {
+    --background: var(--color-ivory);
+    --foreground: var(--color-navy);
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-glow: rgba(255, 255, 255, 0.2);
+  }
+
+  .dark {
+    --background: var(--color-navy);
+    --foreground: var(--color-ivory);
+    --glass-bg: rgba(10, 22, 40, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-glow: rgba(200, 169, 107, 0.1); /* Subtle gold glow */
+  }
+
+  * {
+    @apply border-[color:var(--glass-border)];
+  }
+
+  body {
+    @apply bg-[color:var(--background)] text-[color:var(--foreground)] font-sans antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-gold);
+    color: var(--color-navy);
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-[color:var(--glass-bg)] backdrop-blur-md border border-[color:var(--glass-border)] shadow-[0_4px_30px_rgba(0,0,0,0.1)];
+  }
+  
+  .glass-panel {
+    @apply bg-[color:var(--glass-bg)] backdrop-blur-xl border border-[color:var(--glass-border)] shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+  }
+
+  .text-gold-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#C8A96B] to-[#D4B982];
+  }
+}
+
+/* Fluid background animation */
+.fluid-bg {
+  background: radial-gradient(circle at 50% 0%, rgba(200, 169, 107, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 100% 100%, rgba(47, 74, 68, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 0% 100%, rgba(10, 22, 40, 0.05) 0%, transparent 50%);
+  background-size: 200% 200%;
+  animation: fluid-shift 15s ease infinite alternate;
+}
+
+.dark .fluid-bg {
+  background: radial-gradient(circle at 50% 0%, rgba(200, 169, 107, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 100% 100%, rgba(47, 74, 68, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 0% 100%, rgba(10, 22, 40, 0.5) 0%, transparent 50%);
+  background-size: 200% 200%;
+  animation: fluid-shift 15s ease infinite alternate;
+}
+
+@keyframes fluid-shift {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+/* Custom scrollbar for better aesthetics */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-gold);
+  border-radius: 10px;
+}

@@ -1,0 +1,137 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("AGENT") // OWNER, MANAGER, AGENT, VIEWER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  listings  Listing[]
+  leads     Lead[]
+}
+
+model Listing {
+  id               String   @id @default(uuid())
+  title            String
+  slug             String   @unique
+  listingCode      String   @unique
+  type             String   // Căn hộ, Biệt thự, Nhà phố, Đất nền
+  status           String   @default("DRAFT") // DRAFT, ACTIVE, DEPOSIT, SOLD, HIDDEN
+  price            Float
+  area             Float
+  landArea         Float?
+  bedrooms         Int?
+  bathrooms        Int?
+  floors           Int?
+  direction        String?
+  view             String?
+  yearBuilt        Int?
+  legalStatus      String?
+  description      String
+  
+  // JSON strings for arrays in SQLite (in Postgres these would be String[])
+  images           String   // JSON array of URLs
+  badges           String   // JSON array of strings
+  amenities        String   // JSON array of strings
+  
+  address          String
+  mapCoordinates   String?  // JSON {lat, lng}
+  virtualTourUrl   String?
+  videoUrl         String?
+  internalNotes    String?
+  ownerContact     String?
+  isExclusive      Boolean  @default(false)
+  
+  // Legal Verification
+  legalVerified    Boolean  @default(false)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  agentId          String?
+  agent            User?    @relation(fields: [agentId], references: [id])
+  collections      CollectionListing[]
+  appointments     Appointment[]
+}
+
+model Collection {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  sortRule    String   @default("MANUAL") // MANUAL, NEWEST, PRICE_ASC, PRICE_DESC
+  
+  listings    CollectionListing[]
+}
+
+model CollectionListing {
+  collectionId String
+  listingId    String
+  order        Int      @default(0)
+  
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  listing      Listing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, listingId])
+}
+
+model Lead {
+  id               String   @id @default(uuid())
+  name             String
+  phone            String
+  email            String?
+  budget           Float?
+  preferredType    String?
+  timelineToBuy    String?
+  source           String   // CONTACT_FORM, ZALO, etc.
+  status           String   @default("NEW") // NEW, CONTACTED, VIEWING, NEGOTIATING, WON, LOST
+  notes            String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  agentId          String?
+  agent            User?    @relation(fields: [agentId], references: [id])
+  appointments     Appointment[]
+}
+
+model Appointment {
+  id               String   @id @default(uuid())
+  date             DateTime
+  status           String   @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED
+  notes            String?
+  
+  leadId           String
+  lead             Lead     @relation(fields: [leadId], references: [id])
+  listingId        String?
+  listing          Listing? @relation(fields: [listingId], references: [id])
+}
+
+model SiteImage {
+  slotKey          String   @id // e.g., 'hero_background', 'story_chapter_1'
+  sectionName      String   // Vietnamese label 'Nền đầu trang'
+  description      String?  
+  imageUrl         String
+  mobileImageUrl   String?
+  altText          String
+  recommendedSize  String?
+  focalPointX      Float    @default(50)
+  focalPointY      Float    @default(50)
+  history          String   @default("[]") // JSON string of old versions
+  status           String   @default("PUBLISHED") // DRAFT, PUBLISHED
+  
+  updatedAt        DateTime @updatedAt
+  updatedBy        String?
+}
